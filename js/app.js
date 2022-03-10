@@ -127,7 +127,7 @@ const main = (() => {
     gameData = new GameData(
       playerName,
       gameDifficulty,
-      10,
+      90,
       spaceShipObjectsList,
       new Canon(1, getCorrectAnswer(level), false),
       0,
@@ -254,7 +254,6 @@ const main = (() => {
   });
 
   saveButton.addEventListener("click", () => {
-    console.log(gameData);
     localStorage.setItem("gameData", JSON.stringify(gameData));
   });
 
