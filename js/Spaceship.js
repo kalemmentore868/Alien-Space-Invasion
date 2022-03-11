@@ -7,6 +7,9 @@ export default class Spaceship {
     this.positionY = y;
     this.speed = s;
     this.shipExpression = e;
+
+    this.num1 = Math.floor(Math.random() * 26);
+    this.num2 = Math.floor(Math.random() * 9);
   }
 
   moveShip() {
@@ -18,20 +21,19 @@ export default class Spaceship {
   }
 
   generateRandomExpression(operation) {
-    const num1 = Math.floor(Math.random() * 10);
-    const num2 = Math.floor(Math.random() * 10);
-
     let expression;
 
+    this.num1 = Math.floor(Math.random() * 26);
+    this.num2 = Math.floor(Math.random() * 9);
+
     if (operation === "+") {
-      expression = `${num1} + ${num2}`;
+      expression = `${this.num1} + ${this.num2}`;
     } else if (operation === "-") {
-      num1 >= num2
-        ? (expression = `${num1} - ${num2}`)
-        : (expression = `${num2} - ${num1}`);
+      this.num1 >= this.num2
+        ? (expression = `${this.num1} - ${this.num2}`)
+        : (expression = `${this.num2} - ${this.num1}`);
     }
 
-    console.log(expression);
     return expression;
   }
 
@@ -39,5 +41,17 @@ export default class Spaceship {
     if (difficulty === "hard") {
       this.speed *= 2;
     }
+  }
+
+  getAnswer(level) {
+    let shipAnswer;
+    if (level === 1) {
+      shipAnswer = this.num1 + this.num2;
+    } else if (level === 2) {
+      this.num1 >= this.num2
+        ? (shipAnswer = this.num1 - this.num2)
+        : (shipAnswer = this.num2 - this.num1);
+    }
+    return shipAnswer;
   }
 }

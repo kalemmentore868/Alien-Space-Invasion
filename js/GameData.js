@@ -4,16 +4,18 @@ export default class GameData {
   timeLeft;
   ships;
   canonObj;
+  bulletObj;
   hits;
   misses;
   level;
 
-  constructor(p, d, t, s, c, h, m, l) {
+  constructor(p, d, t, s, c, b, h, m, l) {
     this.playerName = p;
     this.difficulty = d;
     this.timeLeft = t;
     this.ships = s;
     this.canonObj = c;
+    this.bulletObj = b;
     this.hits = h;
     this.misses = m;
     this.level = l;

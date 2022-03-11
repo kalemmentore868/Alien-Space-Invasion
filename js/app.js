@@ -1,6 +1,7 @@
 import Spaceship from "./Spaceship.js";
 import Canon from "./Canon.js";
 import GameData from "./GameData.js";
+import Bullet from "./Bullet.js";
 
 const main = (() => {
   //Dom Elements
@@ -35,8 +36,9 @@ const main = (() => {
   const gameOverScreen = document.querySelector("#gameOverContainer");
 
   //Game variables
-  let bulletMargin = -10;
+
   let gameData;
+  let detectCollision;
 
   //Helpful Functions
 
@@ -46,8 +48,8 @@ const main = (() => {
       const ship = new Spaceship(
         0,
         getRandomSpeed(),
-        `${Math.floor(Math.random() * 10)} ${operation} ${Math.floor(
-          Math.random() * 10
+        `${Math.floor(Math.random() * 25)} ${operation} ${Math.floor(
+          Math.random() * 9
         )}`
       );
       ship.adjustDifficulty(difficulty);
@@ -65,14 +67,9 @@ const main = (() => {
   };
 
   //it returns the answer for the expression of the ship that was randomly picked to be correct
-  const getCorrectAnswer = (level) => {
+  const getCorrectAnswer = (level, spaceShipObjectsList) => {
     const randomIndex = Math.floor(Math.random() * 5);
-    const correctExpression = problemsHeader[randomIndex].innerText;
-    if (level === 1) {
-      return parseInt(correctExpression[0]) + parseInt(correctExpression[4]);
-    } else if (level === 2) {
-      return parseInt(correctExpression[0]) - parseInt(correctExpression[4]);
-    }
+    return spaceShipObjectsList[randomIndex].getAnswer(level);
   };
 
   const hasCollided = (object1, object2) => {
@@ -83,18 +80,12 @@ const main = (() => {
     }
   };
 
-  const resetBullet = () => {
-    bulletMargin = -10;
-    bullet.style.display = "none";
-    bullet.style.marginTop = 0;
-  };
-
   const generateNewProblems = (spaceShipObjectsList, level) => {
     let operation;
     const { canonObj } = gameData;
     level === 1 ? (operation = "+") : (operation = "-");
     populateProblems(spaceShipObjectsList, operation);
-    canonObj.canonAnswer = getCorrectAnswer(level);
+    canonObj.canonAnswer = getCorrectAnswer(level, spaceShipObjectsList);
     canonObj.updateCanonText(canonText);
   };
 
@@ -107,13 +98,19 @@ const main = (() => {
     timer.innerText = gameData.timeLeft;
   };
 
-  const nextLevel = () => {
+  const nextLevel = (detectCollision) => {
     gameData.timeLeft = 30;
     gameData.level = 2;
 
+    if (gameData.canonObj.shotFired) {
+      gameData.bulletObj.resetBullet(bullet);
+      gameData.canonObj.shotFired = false;
+    }
+
     gameData.ships = makeSpaceshipObjectsList("-", gameData.difficulty);
     generateNewProblems(gameData.ships, gameData.level);
-    gameData.canonObj.updateCanonText();
+
+    clearInterval(detectCollision);
   };
 
   const setUpGame = (operation, playerName, gameDifficulty, level) => {
@@ -127,9 +124,10 @@ const main = (() => {
     gameData = new GameData(
       playerName,
       gameDifficulty,
-      90,
+      5,
       spaceShipObjectsList,
-      new Canon(1, getCorrectAnswer(level), false),
+      new Canon(1, getCorrectAnswer(level, spaceShipObjectsList), false),
+      new Bullet(0, 10),
       0,
       0,
       level
@@ -167,7 +165,7 @@ const main = (() => {
         }
 
         if (gameData.timeLeft <= 0 && gameData.level === 1) {
-          nextLevel();
+          nextLevel(detectCollision);
         } else if (gameData.timeLeft <= 0 && gameData.level === 2) {
           playArea.style.display = "none";
           alert("you win");
@@ -206,6 +204,7 @@ const main = (() => {
       gameData.timeLeft,
       gameData.ships,
       gameData.canonObj,
+      gameData.bulletObj,
       gameData.hits,
       gameData.misses,
       gameData.level
@@ -219,6 +218,11 @@ const main = (() => {
       gameData.canonObj.positionX,
       gameData.canonObj.canonAnswer,
       false
+    );
+
+    gameData.bulletObj = new Bullet(
+      gameData.bulletObj.positionY,
+      gameData.bulletObj.speed
     );
 
     welcomeScreen.style.display = "none";
@@ -258,7 +262,7 @@ const main = (() => {
   });
 
   document.addEventListener("keydown", (event) => {
-    const { canonObj, ships, level } = gameData;
+    const { canonObj, ships, level, bulletObj } = gameData;
 
     if (event.key === "ArrowRight") {
       canonObj.moveCanonRight(cannon);
@@ -268,22 +272,12 @@ const main = (() => {
       canonObj.shotFired = true;
       bullet.style.display = "block";
 
-      const detectCollision = setInterval(() => {
-        bullet.style.marginTop = `${bulletMargin}px `;
-        bulletMargin += -20;
+      detectCollision = setInterval(() => {
+        bulletObj.moveBullet(bullet);
 
         for (let i = 0; i < spaceshipList.length; i++) {
           if (hasCollided(bullet, spaceshipList[i])) {
-            let shipAnswer;
-            if (level === 1) {
-              shipAnswer =
-                parseInt(problemsHeader[i].innerText[0]) +
-                parseInt(problemsHeader[i].innerText[4]);
-            } else if (level === 2) {
-              shipAnswer =
-                parseInt(problemsHeader[i].innerText[0]) -
-                parseInt(problemsHeader[i].innerText[4]);
-            }
+            let shipAnswer = ships[i].getAnswer(level);
 
             if (
               canonObj.canonAnswer === shipAnswer &&
@@ -292,7 +286,7 @@ const main = (() => {
               gameData.updateHits(hitsCounter);
 
               gameData.resetAllShips();
-              resetBullet();
+              bulletObj.resetBullet(bullet);
               generateNewProblems(ships, level);
               canonObj.shotFired = false;
               clearInterval(detectCollision);
@@ -302,7 +296,7 @@ const main = (() => {
             ) {
               gameData.updateMisses(missesCounter);
 
-              resetBullet();
+              bulletObj.resetBullet(bullet);
               generateNewProblems(ships, level);
               canonObj.shotFired = false;
               clearInterval(detectCollision);
