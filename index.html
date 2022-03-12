@@ -16,16 +16,16 @@
 </head>
 <body>
     <main>
-
-       <!-- Welcome Screen-->
-        <section id = "welcomeScreen">
+<!-- 
+       Welcome Screen-->
+      <section id = "welcomeScreen">
             <h1>Alien Invasion</h1>
 
             <div id = "spaceshipImageContainer">
                 <img src = "media/spaceship.png" class = "spaceshipImage animate__animated">
                 <img src = "media/spaceship.png" class = "spaceshipImage animate__animated">
                 <img src = "media/spaceship.png" class = "spaceshipImage animate__animated">
-            </div>
+            </div> 
 
             <button type = "button" id = "gameRulesBtn"> How To Play </button>
             <div id = "rulesContainer" hidden>
@@ -70,11 +70,11 @@
         <!--Game Container-->
         <section id = "playArea">
             <section id = "spaceshipContainer">
-               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> </div>
-               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> </div>
-               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> </div>
-               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> </div>
-               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> </div>
+               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> <audio src="media/explosion.wav"></audio> </div>
+               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> <audio src="media/explosion.wav"></audio></div>
+               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2><audio src="media/explosion.wav"></audio> </div>
+               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> <audio src="media/explosion.wav"></audio></div>
+               <div class = "spaceships"><img src = "media/spaceship.png"> <h2 class="problem"></h2> <audio src="media/explosion.wav"></audio></div>
 
                 <!--Cannon-->
                 <div id = "cannon">
@@ -92,6 +92,18 @@
             <div id = "misses"></div>
             <div id="save-game">Save</div>
         </section>
+<!-- 
+        <section id = "youWinContainer">
+            <div id = "youWin">
+                 <h2 class = "animate__animated animate__zoomInDown">Good Job!</h2>
+                <div id="youWinScreenSpaceShips">
+                    <img src = "media/spaceship.png" class = "animate__animated animate__fadeInRight animate__delay-3s">
+                    <img src = "media/spaceship.png" class = "animate__animated animate__fadeInUpBig animate__delay-5s ">
+                    <img src = "media/spaceship.png" class = "animate__animated animate__fadeInUpBig animate__delay-7s">
+                </div>
+                <button type = "button" id = "playAgainBtn">PlayAgain?</button>
+            </div>
+        </section> -->
 
         <section id = gameOverContainer>
             <div id = "gameOver">

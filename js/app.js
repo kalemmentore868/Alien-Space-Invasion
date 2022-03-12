@@ -4,6 +4,8 @@ import GameData from "./GameData.js";
 import Bullet from "./Bullet.js";
 
 const main = (() => {
+  // let key = "Lco6hKibew1GgmTcgxvGyLfmwzm0QSNauCXKdXaw"
+  // fetch(`https://images-api.nasa.gov`)
   //Dom Elements
   const splayArea = document.querySelector("#playArea");
   const spaceshipList = document.querySelectorAll(".spaceships");
@@ -22,6 +24,7 @@ const main = (() => {
 
   const startGameBtn = document.querySelector("#startGameBtn");
   const welcomeScreen = document.querySelector("#welcomeScreen");
+  const youWinContainer = document.querySelector("#youWinContainer");
   const loadGameBtn = document.querySelector("#load-game");
 
   const imageSoundToggle = document.querySelector("#startOrStopImg");
@@ -90,7 +93,7 @@ const main = (() => {
   };
 
   const getRandomSpeed = () => {
-    return 10 + Math.floor(Math.random() * 10);
+    return 0.1 + 1 / (Math.floor(Math.random() * 2) + 1.5);
   };
 
   const decrementTimer = () => {
@@ -106,11 +109,9 @@ const main = (() => {
       gameData.bulletObj.resetBullet(bullet);
       gameData.canonObj.shotFired = false;
     }
-
+    clearInterval(detectCollision);
     gameData.ships = makeSpaceshipObjectsList("-", gameData.difficulty);
     generateNewProblems(gameData.ships, gameData.level);
-
-    clearInterval(detectCollision);
   };
 
   const setUpGame = (operation, playerName, gameDifficulty, level) => {
@@ -124,10 +125,10 @@ const main = (() => {
     gameData = new GameData(
       playerName,
       gameDifficulty,
-      5,
+      30,
       spaceShipObjectsList,
       new Canon(1, getCorrectAnswer(level, spaceShipObjectsList), false),
-      new Bullet(0, 10),
+      new Bullet(0, 5),
       0,
       0,
       level
@@ -140,18 +141,15 @@ const main = (() => {
     for (let i = 0; i < problemsHeader.length; i++) {
       problemsHeader[i].innerText = gameData.ships[i].shipExpression;
     }
-
+    gameData.ships.map((ship) => ship.determineNum());
     hitsCounter.innerText = `Hits: ${gameData.hits}`;
-
     missesCounter.innerText = `Misses: ${gameData.misses}`;
     canonText.innerText = gameData.canonObj.canonAnswer;
     cannon.style.gridColumn = gameData.canonObj.positionX;
   };
-
   const startGame = () => {
+    setInterval(decrementTimer, 1000);
     const moveShip = setInterval(() => {
-      decrementTimer();
-
       for (let i = 0; i < spaceshipList.length; i++) {
         let conceptShip = gameData.ships[i];
 
@@ -159,19 +157,20 @@ const main = (() => {
         spaceshipList[i].style.marginTop = `${conceptShip.positionY}px`;
 
         if (hasCollided(cannon, spaceshipList[i])) {
+          clearInterval(moveShip);
           playArea.style.display = "none";
           gameOverScreen.style.display = "block";
-          clearInterval(moveShip);
         }
 
         if (gameData.timeLeft <= 0 && gameData.level === 1) {
           nextLevel(detectCollision);
         } else if (gameData.timeLeft <= 0 && gameData.level === 2) {
           playArea.style.display = "none";
+          clearInterval(moveShip);
           alert("you win");
         }
       }
-    }, 1000);
+    }, 10);
   };
 
   //Event Listeners
@@ -268,7 +267,7 @@ const main = (() => {
       canonObj.moveCanonRight(cannon);
     } else if (event.key === "ArrowLeft") {
       canonObj.moveCanonLeft(cannon);
-    } else if (event.key === " ") {
+    } else if (event.key === " " && canonObj.shotFired === false) {
       canonObj.shotFired = true;
       bullet.style.display = "block";
 
@@ -283,10 +282,17 @@ const main = (() => {
               canonObj.canonAnswer === shipAnswer &&
               i + 1 === canonObj.positionX
             ) {
+              ships[i].correctAnswer(spaceshipList[i]);
               gameData.updateHits(hitsCounter);
 
-              gameData.resetAllShips();
+              setTimeout(() => {
+                spaceshipList[i].children[0].src = "media/spaceship.png";
+                spaceshipList[i].children[0].style.zIndex = "0";
+                gameData.resetAllShips();
+              }, 500);
+
               bulletObj.resetBullet(bullet);
+
               generateNewProblems(ships, level);
               canonObj.shotFired = false;
               clearInterval(detectCollision);
@@ -294,8 +300,8 @@ const main = (() => {
               canonObj.canonAnswer !== shipAnswer &&
               i + 1 === canonObj.positionX
             ) {
+              ships[i].incorrectAnswer(spaceshipList[i]);
               gameData.updateMisses(missesCounter);
-
               bulletObj.resetBullet(bullet);
               generateNewProblems(ships, level);
               canonObj.shotFired = false;
@@ -303,7 +309,7 @@ const main = (() => {
             }
           }
         }
-      }, 300);
+      }, 20);
     }
   });
 })();

@@ -8,6 +8,7 @@ export default class Bullet {
   }
 
   moveBullet(element) {
+    element.style.display = "block";
     this.positionY -= this.speed;
     element.style.marginTop = `${this.positionY}px `;
   }
