@@ -7,7 +7,7 @@ const main = (() => {
   // let key = "Lco6hKibew1GgmTcgxvGyLfmwzm0QSNauCXKdXaw"
   // fetch(`https://images-api.nasa.gov`)
   //Dom Elements
-  const splayArea = document.querySelector("#playArea");
+  const playArea = document.querySelector("#playArea");
   const spaceshipList = document.querySelectorAll(".spaceships");
   const problemsHeader = document.querySelectorAll(".problem");
   const cannon = document.querySelector("#cannon");
@@ -38,10 +38,14 @@ const main = (() => {
 
   const gameOverScreen = document.querySelector("#gameOverContainer");
 
+  const playAgainBtn = document.querySelector("#playAgainBtn");
+  const playAgainBtnWin = document.querySelector("#playAgainBtnWin");
+
   //Game variables
 
   let gameData;
   let detectCollision;
+  let moveShip;
 
   //Helpful Functions
 
@@ -93,7 +97,7 @@ const main = (() => {
   };
 
   const getRandomSpeed = () => {
-    return 0.1 + 1 / (Math.floor(Math.random() * 2) + 1.5);
+    return 0.1 + 1 / (Math.floor(Math.random() * 2.5) + 1.5);
   };
 
   const decrementTimer = () => {
@@ -147,31 +151,80 @@ const main = (() => {
     canonText.innerText = gameData.canonObj.canonAnswer;
     cannon.style.gridColumn = gameData.canonObj.positionX;
   };
+
   const startGame = () => {
-    setInterval(decrementTimer, 1000);
-    const moveShip = setInterval(() => {
+    const timeFunc = setInterval(decrementTimer, 1000);
+    moveShip = setInterval(() => {
       for (let i = 0; i < spaceshipList.length; i++) {
         let conceptShip = gameData.ships[i];
 
         conceptShip.moveShip();
         spaceshipList[i].style.marginTop = `${conceptShip.positionY}px`;
 
-        if (hasCollided(cannon, spaceshipList[i])) {
+        if (hasCollided(cannon, spaceshipList[i]) && gameData.timeLeft >= 0) {
           clearInterval(moveShip);
           playArea.style.display = "none";
           gameOverScreen.style.display = "block";
         }
 
-        if (gameData.timeLeft <= 0 && gameData.level === 1) {
+        if (gameData.timeLeft === 0 && gameData.level === 1) {
           nextLevel(detectCollision);
-        } else if (gameData.timeLeft <= 0 && gameData.level === 2) {
-          playArea.style.display = "none";
+        } else if (gameData.timeLeft === 0 && gameData.level === 2) {
           clearInterval(moveShip);
-          alert("you win");
+          clearInterval(timeFunc);
+          youWinContainer.style.display = "grid";
+          playArea.style.display = "none";
+          gameOverScreen.style.display = "none";
         }
       }
     }, 10);
   };
+
+  function handleCorrectAnswer(i, ships) {
+    ships[i].correctAnswer(spaceshipList[i]);
+    gameData.updateHits(hitsCounter);
+    setTimeout(() => {
+      spaceshipList[i].children[0].src = "media/spaceship.png";
+      spaceshipList[i].children[0].style.zIndex = "0";
+      gameData.resetAllShips();
+    }, 500);
+  }
+
+  function handleIncorrectAnswer(i, ships) {
+    ships[i].incorrectAnswer(spaceshipList[i]);
+    gameData.updateMisses(missesCounter);
+  }
+
+  function resetAfterCollision(bulletObj, ships, level, canonObj) {
+    bulletObj.resetBullet(bullet);
+    generateNewProblems(ships, level);
+    canonObj.shotFired = false;
+    clearInterval(detectCollision);
+  }
+
+  function handleBulletFired(bulletObj, ships, level, canonObj) {
+    bulletObj.moveBullet(bullet);
+
+    for (let i = 0; i < spaceshipList.length; i++) {
+      if (hasCollided(bullet, spaceshipList[i])) {
+        let shipAnswer = ships[i].getAnswer(level);
+
+        const gotItCorrect =
+          canonObj.canonAnswer === shipAnswer && i + 1 === canonObj.positionX;
+
+        const gotItWrong =
+          canonObj.canonAnswer !== shipAnswer && i + 1 === canonObj.positionX;
+
+        if (gotItCorrect) {
+          handleCorrectAnswer(i, ships);
+          resetAfterCollision(bulletObj, ships, level, canonObj);
+        } else if (gotItWrong) {
+          handleIncorrectAnswer(i, ships);
+          resetAfterCollision(bulletObj, ships, level, canonObj);
+        }
+      }
+    }
+  }
 
   //Event Listeners
   gameRulesBtn.addEventListener("click", () => {
@@ -269,47 +322,51 @@ const main = (() => {
       canonObj.moveCanonLeft(cannon);
     } else if (event.key === " " && canonObj.shotFired === false) {
       canonObj.shotFired = true;
-      bullet.style.display = "block";
 
       detectCollision = setInterval(() => {
-        bulletObj.moveBullet(bullet);
-
-        for (let i = 0; i < spaceshipList.length; i++) {
-          if (hasCollided(bullet, spaceshipList[i])) {
-            let shipAnswer = ships[i].getAnswer(level);
-
-            if (
-              canonObj.canonAnswer === shipAnswer &&
-              i + 1 === canonObj.positionX
-            ) {
-              ships[i].correctAnswer(spaceshipList[i]);
-              gameData.updateHits(hitsCounter);
-
-              setTimeout(() => {
-                spaceshipList[i].children[0].src = "media/spaceship.png";
-                spaceshipList[i].children[0].style.zIndex = "0";
-                gameData.resetAllShips();
-              }, 500);
-
-              bulletObj.resetBullet(bullet);
-
-              generateNewProblems(ships, level);
-              canonObj.shotFired = false;
-              clearInterval(detectCollision);
-            } else if (
-              canonObj.canonAnswer !== shipAnswer &&
-              i + 1 === canonObj.positionX
-            ) {
-              ships[i].incorrectAnswer(spaceshipList[i]);
-              gameData.updateMisses(missesCounter);
-              bulletObj.resetBullet(bullet);
-              generateNewProblems(ships, level);
-              canonObj.shotFired = false;
-              clearInterval(detectCollision);
-            }
-          }
-        }
+        handleBulletFired(bulletObj, ships, level, canonObj);
       }, 20);
     }
+  });
+
+  //for mobile
+
+  let touchstartX = 0;
+  let touchendX = 0;
+
+  function handleGesture() {
+    if (touchendX < touchstartX) gameData.canonObj.moveCanonLeft(cannon);
+    if (touchendX > touchstartX) gameData.canonObj.moveCanonRight(cannon);
+  }
+
+  playArea.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    touchstartX = e.changedTouches[0].screenX;
+  });
+
+  playArea.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    touchendX = e.changedTouches[0].screenX;
+    if (touchstartX === touchendX && gameData) {
+      const { canonObj, ships, level, bulletObj } = gameData;
+      if (canonObj.shotFired === false) {
+        canonObj.shotFired = true;
+        detectCollision = setInterval(() => {
+          handleBulletFired(bulletObj, ships, level, canonObj);
+        }, 20);
+      }
+    } else {
+      handleGesture();
+    }
+  });
+
+  playAgainBtn.addEventListener("click", () => {
+    gameOverScreen.style.display = "none";
+    welcomeScreen.style.display = "grid";
+  });
+
+  playAgainBtnWin.addEventListener("click", () => {
+    youWinContainer.style.display = "none";
+    welcomeScreen.style.display = "grid";
   });
 })();

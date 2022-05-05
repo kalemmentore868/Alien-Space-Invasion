@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* outline: 1px solid red; */
 }
 
 body {
@@ -21,7 +22,7 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   justify-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-image: linear-gradient(315deg, #130e3a 0%, #021304 74%);
 }
 h1 {
@@ -55,13 +56,21 @@ h1 {
 
 #gameRulesBtn,
 #startGameBtn,
-#playAgainBtn,
 #load-game {
   background-color: transparent;
   box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);
   border: 2px solid white;
 }
 
+#playAgainBtn, #playAgainBtnWin{
+  background-color: transparent;
+  box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);
+  border: 2px solid white;
+  width: 200px;
+}
+
+#playAgainBtnWin:hover,
+#playAgainBtn:hover,
 #startGameBtn:hover,
 #load-game:hover {
   background-image: linear-gradient(-315deg, #702428 64%, #ce4158 0%);
@@ -194,9 +203,9 @@ button {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   column-gap: 16px;
-  margin: auto;
+  /* margin: auto; */
   justify-items: center;
-  height: 76vh;
+  height: 90vh;
 }
 
 .spaceships {
@@ -254,7 +263,7 @@ button {
 #save-game {
   color: white;
   font-size: 1.5rem;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
 }
 
 #save-game:hover {
@@ -265,11 +274,13 @@ button {
   display: none;
   height: 100vh;
   background-image: linear-gradient(315deg, #130e3a 0%, #021304 74%);
-  padding-top: 10%;
+overflow-y: hidden;
 }
 #gameOver {
   display: grid;
   grid-template-columns: 1fr;
+  height: 100%;
+
 }
 
 h2 {
@@ -282,4 +293,94 @@ h2 {
 
 #gameOverspaceships {
   justify-self: center;
+}
+
+.game-info{
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+position: absolute;
+bottom: 0;
+}
+
+#youWinContainer{
+  display: none;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  align-content: center;
+  height: 100vh;
+  text-align: center;
+  gap: 30px;
+}
+
+#youWinScreenSpaceShips{
+  margin: 25px 0;
+}
+
+@media (max-width: 500px){
+  #gameRulesBtn,
+#startGameBtn,
+#playAgainBtn,
+#load-game {
+  width: 200px;
+}
+
+#welcomeScreen {
+  padding: 0 20px;
+}
+h1 {
+
+  font-size: 2.5rem;
+
+}
+#rulesContainer {
+  font-size: .9em;
+  width: 80%;
+
+}
+
+#playerAvatar {
+
+  height: 80px;
+  width: 80px;
+  justify-self: center;
+}
+
+#name {
+
+  padding-left: 0;
+
+}
+input[type="text"] {
+
+  width: 175px;
+}
+.game-info{
+  
+bottom: unset;
+top: 100px;
+}
+
+#gameOverContainer {
+  display: none;
+  height: 100vh;
+  background-image: linear-gradient(315deg, #130e3a 0%, #021304 74%);
+  padding-top: 0;
+}
+#gameOver {
+  display: grid;
+  grid-template-columns: 1fr;
+  height: 100%;
+  align-content: center;
+}
+
+#playAgainBtn{
+ position: absolute;
+ top: 20vh;
+ margin-left: auto;
+margin-right: auto;
+left: 0;
+right: 0;
+text-align: center;
+}
 }
