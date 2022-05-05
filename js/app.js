@@ -187,7 +187,7 @@ const main = (() => {
       spaceshipList[i].children[0].src = "media/spaceship.png";
       spaceshipList[i].children[0].style.zIndex = "0";
       gameData.resetAllShips();
-    }, 500);
+    }, 200);
   }
 
   function handleIncorrectAnswer(i, ships) {
