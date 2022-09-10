@@ -1,0 +1,2 @@
+# Alien-Space-Invasion
+Another HTML5 game where users score points by shooting the spaceships whose arithmetic expression corresponds with the answer provided near the cannon. The game was made using vanilla HTML, CSS and Javascript. It was made while interning for The Weekend Hack and the workload was split between two other colleagues and myself.We utilized Object Oriented Programming while developing this game where each game object such as the cannon, spaceship, and bullet was abstracted into classes and used as js objects in the code
